@@ -309,6 +309,14 @@ a, a:link, a:visited {
 /* Navigation
 --------------------------------------- */
 
+.guides-search-input {
+  border-radius: 10px;
+  border: none;
+  padding: 0.5rem 1rem;
+  width: 95%;
+  margin-top: 1rem;
+}
+
 .nav {
   margin: 0;
   padding: 0;
