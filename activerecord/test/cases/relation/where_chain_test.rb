@@ -153,5 +153,33 @@ module ActiveRecord
 
       assert_equal expected.to_a, relation.to_a
     end
+
+    def test_where_satisfies
+      relation = Post.where.satisfies { |post| (post.author_id != 1).and(post.id > 2) }
+      expected = Post.where("posts.author_id != ? AND posts.id > ?", 1, 2)
+
+      assert_equal expected.to_a, relation.to_a
+    end
+
+    def test_where_satisfies_with_like
+      relation = Post.where.satisfies { |post| post.title.like("%comments%") }
+      expected = Post.where("posts.title LIKE ?", "%comments%")
+
+      assert_equal expected.to_a, relation.to_a
+    end
+
+    def test_where_satisfies_with_not_like
+      relation = Post.where.satisfies { |post| post.title.not_like("%comments%") }
+      expected = Post.where("posts.title NOT LIKE ?", "%comments%")
+
+      assert_equal expected.to_a, relation.to_a
+    end
+
+    def test_where_satisfies_on_joined_table
+      relation = Post.joins(:comments).where.satisfies { |post| post.comments.type.like("%Special%") }.to_a
+      expected = Post.joins(:comments).where("comments.type LIKE ?", "%Special%").to_a
+
+      assert_equal expected.to_a, relation.to_a
+    end
   end
 end
