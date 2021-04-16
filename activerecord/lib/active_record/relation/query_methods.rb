@@ -2,6 +2,7 @@
 
 require "active_record/relation/from_clause"
 require "active_record/relation/query_attribute"
+require "active_record/relation/query_composer"
 require "active_record/relation/where_clause"
 require "active_model/forbidden_attributes_protection"
 require "active_support/core_ext/array/wrap"
@@ -102,6 +103,11 @@ module ActiveRecord
         end
 
         @scope
+      end
+
+      def satisfies(&block)
+        conditions = yield QueryComposer.new(@scope)
+        @scope.where(conditions.to_arel)
       end
     end
 
