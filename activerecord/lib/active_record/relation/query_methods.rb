@@ -2,6 +2,8 @@
 
 require "active_record/relation/from_clause"
 require "active_record/relation/query_attribute"
+require "active_record/relation/query_composer"
+require "active_record/relation/sql_context"
 require "active_record/relation/where_clause"
 require "active_model/forbidden_attributes_protection"
 require "active_support/core_ext/array/wrap"
@@ -669,6 +671,11 @@ module ActiveRecord
     def where!(opts, *rest) # :nodoc:
       self.where_clause += build_where_clause(opts, rest)
       self
+    end
+
+    def wharel(&block)
+      conditions = SqlContext.new.instance_exec(QueryComposer.new(self), &block)
+      where(conditions.to_arel)
     end
 
     # Allows you to change a previously set where condition for a given attribute, instead of appending to that condition.
