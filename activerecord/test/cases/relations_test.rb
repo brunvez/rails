@@ -63,6 +63,21 @@ class RelationTest < ActiveRecord::TestCase
     assert_equal 1, posts.to_a.size
   end
 
+  def test_wharel
+    posts = Post.wharel { |post| (post.author_id != 1).and(post.id > 2) }
+    assert_equal 6, posts.to_a.size
+  end
+
+  def test_wharel_can_chain
+    posts = Post.wharel { |post| post.author_id >= 1 }.wharel { |post| post.id <= 4 }
+    assert_equal 3, posts.to_a.size
+  end
+
+  def test_wharel_with_sql_functions
+    authors = Author.wharel { |author| lower(coalesce(author.organization_id, "None")) == "none" }
+    assert_equal 2, authors.to_a.size
+  end
+
   def test_scoped
     topics = Topic.all
     assert_kind_of ActiveRecord::Relation, topics
@@ -510,6 +525,12 @@ class RelationTest < ActiveRecord::TestCase
 
   def test_finding_with_hash_conditions_on_joined_table
     firms = DependentFirm.joins(:account).where(name: "RailsCore", accounts: { credit_limit: 55..60 }).to_a
+    assert_equal 1, firms.size
+    assert_equal companies(:rails_core), firms.first
+  end
+
+  def tests_finding_with_block_on_joined_table
+    firms = DependentFirm.joins(:account).where { |firm| (firm.name == "RailsCore").and(firm.accounts.credit_limit.in(55..60)) }.to_a
     assert_equal 1, firms.size
     assert_equal companies(:rails_core), firms.first
   end
